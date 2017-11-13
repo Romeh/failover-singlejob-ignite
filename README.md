@@ -6,3 +6,4 @@ as you know failover support in apache ignite for computation tasks is only cove
 
 Ok what about if I need to execute just single computation task and I need to have failover guarantee due may be it is a critical task that do financial data modification or must finished task in an acceptable status (Success or Failure) , how we can do that ? it is not supported out of the box by Ignite but we can have a small design extension using Ignite APIs to cover the same , HOW ?
 
+![Alt text](/config/igniteFailOver.jpg?raw=true "Overview design")
