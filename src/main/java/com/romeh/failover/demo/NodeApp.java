@@ -7,9 +7,7 @@ import org.apache.ignite.events.EventType;
 import javax.cache.expiry.CreatedExpiryPolicy;
 import javax.cache.expiry.Duration;
 
-/**
- * Created by D-UX07QF on 13/03/2017.
- */
+
 public class NodeApp {
 
     public static void main(String[] args) throws Exception {
