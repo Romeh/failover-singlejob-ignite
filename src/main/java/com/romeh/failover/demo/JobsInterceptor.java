@@ -10,9 +10,7 @@ import javax.cache.Cache;
 
 import static com.romeh.failover.demo.CacheNames.ICEP_JOBS;
 
-/**
- * Created by D-UX07QF on 14/03/2017.
- */
+
 public class JobsInterceptor extends CacheInterceptorAdapter<String, Job> {
 
     @IgniteInstanceResource

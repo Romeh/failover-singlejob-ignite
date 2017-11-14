@@ -4,9 +4,6 @@ import org.apache.ignite.Ignition;
 
 import java.io.Serializable;
 
-/**
- * Created by D-UX07QF on 13/03/2017.
- */
 // example of sensitive action , best practice is to make it idempotent , if not you can use checkpoints for task state saving
 
 public class QueryTask implements Serializable{

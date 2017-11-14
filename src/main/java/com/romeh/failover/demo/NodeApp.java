@@ -14,20 +14,20 @@ public class NodeApp {
 
     public static void main(String[] args) throws Exception {
         // just for demo and test purpose , you should design more generic bootstrap logic to start your node
-        Ignite ignite = Ignition.start("config/igniteExpiry.xml");
+        Ignite ignite = Ignition.start("config/igniteFailOver.xml");
         try {
 
             IgniteCache<String, Job> cache = ignite.cache(CacheNames.ICEP_JOBS.name());
             // enable that ONLY for one node and after you start see the system outs , you can kill that node to see the fail over logic in the second node
             System.out.println("start of jobs creation");
-            for (int i = 0; i <= 25; i++) {
+           /* for (int i = 0; i <= 25; i++) {
                 String key = i + "Key";
                 // start creating jobs by inserting them into the
                 cache.put(key
                         , Job.builder().nodeId(ignite.cluster().localNode().id().toString()).
                                 request(Request.builder().requestID(key).modifiedTimestamp(System.currentTimeMillis()).build()).
                                 build());
-            }
+            }*/
             // listen globally for all nodes failed or removed events
             ignite.events().localListen(event -> {
                 DiscoveryEvent discoveryEvent = (DiscoveryEvent) event;

@@ -8,9 +8,6 @@ import org.apache.ignite.cache.query.annotations.QuerySqlField;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
- * Created by D-UX07QF on 13/03/2017.
- */
 
 @Builder
 @Getter
