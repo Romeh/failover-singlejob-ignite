@@ -1,8 +1,9 @@
-### How to guarantee your single computation task to be finished in case of node
-crash in apache Ignite 
+### How to guarantee your single computation task to be finished in case of node crash in apache Ignite 
+</br>
 
 How to guarantee your single computation task is guaranteed to failover in case
 of node failures in apache Ignite ?
+
 
 ![](https://cdn-images-1.medium.com/max/800/1*Yclh5mXd8QfJu3AYMEfBWQ.png)
 
@@ -89,6 +90,7 @@ example you will see the following in the IDEA console:
 > id: 19Key<br> Executing the expiry post action for the request19Key
 
 <br> 
+My Main post on medium:  
 
 #### **References :**
 
