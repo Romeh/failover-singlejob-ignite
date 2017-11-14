@@ -18,14 +18,14 @@ public class NodeApp {
             IgniteCache<String, Job> cache = ignite.cache(CacheNames.ICEP_JOBS.name());
             // enable that ONLY for one node and after you start see the system outs , you can kill that node to see the fail over logic in the second node
             System.out.println("start of jobs creation");
-           /* for (int i = 0; i <= 25; i++) {
-                String key = i + "Key";
+           for (int i = 0; i <= 25; i++) {
+               String key = i + "Key";
                 // start creating jobs by inserting them into the
                 cache.put(key
                         , Job.builder().nodeId(ignite.cluster().localNode().id().toString()).
                                 request(Request.builder().requestID(key).modifiedTimestamp(System.currentTimeMillis()).build()).
                                 build());
-            }*/
+            }
             // listen globally for all nodes failed or removed events
             ignite.events().localListen(event -> {
                 DiscoveryEvent discoveryEvent = (DiscoveryEvent) event;

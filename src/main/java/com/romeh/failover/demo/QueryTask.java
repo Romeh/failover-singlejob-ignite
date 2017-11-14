@@ -11,10 +11,10 @@ public class QueryTask implements Serializable{
 
     public void execute(Request request){
         // start of the logic where it will take the data from
-        System.out.println("Executing the expiry post action for the request" +request.getRequestID());
+        System.out.println("Executing computation logic for the request " +request.getRequestID());
        // simulate processing time
         try {
-            Thread.sleep(50000);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
