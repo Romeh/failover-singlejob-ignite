@@ -30,9 +30,71 @@ store in production if you need to survive total grid crash
 > 2- Define jobs cache after put interceptor to set the node id which is the
 > primary owner and triggerer of that compute task 
 
+How the ignite jobs cache interceptor is implemented :
+```java
+
+public class JobsInterceptor extends CacheInterceptorAdapter<String, Job> {
+
+    @IgniteInstanceResource
+    Ignite ignite;
+
+
+    @Nullable@Override
+    public void onAfterPut(Cache.Entry<String, Job> entry) {
+        // sample sensitive computation task
+        QueryTask queryTask=new QueryTask();
+        // get current node reference to get its node id
+        ClusterNode clusterNode = ignite.cluster().localNode();
+        System.out.println("intercepting for job action triggering and setting node id : "+ clusterNode.id().toString());
+        //store node id in the job wrapper object
+        entry.getValue().setNodeId(clusterNode.id().toString());
+        //create async computation with specific timeout with affinity to the jobs data cache to have collocated computation
+        ignite.compute().withTimeout(5500)
+                .affinityRunAsync(ICEP_JOBS.name(),entry.getKey(),
+                        ()->queryTask.execute(entry.getValue().getRequest()));
+    }
+
+}
+```
 > 3- Define nodes cache interceptor to intercept after put actions so it can query
 > for all pending jobs for that node id then submit them again into the compute
 grid with affinity 
+```java
+public class NodesInterceptor extends CacheInterceptorAdapter<String, String> {
+
+    @IgniteInstanceResource
+    Ignite ignite;
+    private transient IgniteCache<String, Job> jobs;
+    private final String sql = "nodeId = ?";
+    private transient SqlQuery<String, Job> affinityKeyRequestSqlQuery;
+
+
+    @Nullable@Override
+    public void onAfterPut(Cache.Entry<String, String> entry) {
+        // sample compute task that can be sensitive and it need to have fail over support
+        QueryTask task = new QueryTask();
+        // get partitioned jobs cache reference
+        jobs = ignite.cache(ICEP_JOBS.name());
+        // get the current local node reference
+        ClusterNode clusterNode = ignite.cluster().localNode();
+        System.out.println("intercepting for Node failure and retry from node id : "+ clusterNode.id().toString()+" to node id : "+entry.getValue());
+
+        // Create query to get pending jobs for that node id and submit them again
+        affinityKeyRequestSqlQuery= new SqlQuery<>(Job.class, sql);
+        affinityKeyRequestSqlQuery.setArgs(entry.getValue());
+        jobs.query(affinityKeyRequestSqlQuery).forEach(affinityKeyJobEntry -> {
+            System.out.println("found a pending jobs for node id: "+entry.getValue() +" and job id: "+affinityKeyJobEntry.getKey());
+            // submit again the jobs for re-execution
+            ignite.compute().withTimeout(5500)
+                    .affinityRunAsync(ICEP_JOBS.name(),affinityKeyJobEntry.getKey(),
+                            ()->task.execute(affinityKeyJobEntry.getValue().request));
+
+        });
+    }
+}
+```
+
+
 
 > 4- Enable event listening for node left and node removal in the grid to
 > intercept node failure
@@ -56,7 +118,52 @@ the execution state to resume from the last saved point
 **Testing flow :**
 
 1- first run the first ignite server node with that code commented out :
+```java
+public class NodeApp {
 
+    public static void main(String[] args) throws Exception {
+        // just for demo and test purpose , you should design more generic bootstrap logic to start your node
+        Ignite ignite = Ignition.start("config/igniteFailOver.xml");
+        try {
+
+            IgniteCache<String, Job> cache = ignite.cache(CacheNames.ICEP_JOBS.name());
+            // enable that ONLY for one node and after you start see the system outs , you can kill that node to see the fail over logic in the second node
+            System.out.println("start of jobs creation");
+          /* for (int i = 0; i <= 25; i++) {
+               String key = i + "Key";
+                // start creating jobs by inserting them into the
+                cache.put(key
+                        , Job.builder().nodeId(ignite.cluster().localNode().id().toString()).
+                                request(Request.builder().requestID(key).modifiedTimestamp(System.currentTimeMillis()).build()).
+                                build());
+            }*/
+            // listen globally for all nodes failed or removed events
+            ignite.events().localListen(event -> {
+                DiscoveryEvent discoveryEvent = (DiscoveryEvent) event;
+                System.out.println("Received Node event [evt=" + discoveryEvent.name() +
+                        ", nodeID=" + discoveryEvent.eventNode() + ']');
+
+                ignite.compute().runAsync(() -> {
+                    IgniteCache<String, String> nodes = ignite.cache(CacheNames.ICEP_NODES.name());
+                    String failedNodeId = discoveryEvent.eventNode().id().toString();
+                    // only one NODE will manage to insert successfully as it it is an atomic operation and thread safe
+                    nodes.withExpiryPolicy(new CreatedExpiryPolicy(Duration.ONE_HOUR)).putIfAbsent(failedNodeId, failedNodeId);
+                });
+
+                return true;
+
+            }, EventType.EVT_NODE_LEFT, EventType.EVT_NODE_FAILED);
+
+
+        } catch (Exception e) {
+            // just for test , do not do that in production code
+            e.printStackTrace();
+        }
+
+    }
+}
+
+```
 2- then run the second server node but before doing it , uncomment the
 highlighted code above which simulate creating now jobs for computation by
 inserting them into the jobs cache
@@ -90,8 +197,6 @@ example you will see the following in the IDEA console:
 > id: 19Key<br> Executing the expiry post action for the request19Key
 
 <br> 
-My Main post on medium:  
-
 #### **References :**
 
 * Apache Ignite :
