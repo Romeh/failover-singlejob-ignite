@@ -1,5 +1,5 @@
-**How to guarantee your single computation task to be finished in case of node
-crash in apache Ignite **
+### How to guarantee your single computation task to be finished in case of node
+crash in apache Ignite 
 
 How to guarantee your single computation task is guaranteed to failover in case
 of node failures in apache Ignite ?
@@ -18,7 +18,7 @@ modification or must finished task in an acceptable status (Success or Failure)
 , how we can do that ? it is not supported out of the box by Ignite but we can
 have a small design extension using Ignite APIs to cover the same , HOW ?
 
-
+![Alt text](/config/igniteFailOver.jpg?raw=true "Overview design")
 
 **Here is the main steps from the overview above via the following flow :**
 
@@ -51,20 +51,6 @@ case
 and resubmit them again for computation , optimal case if you have idempotent
 actions so it can be executed multiple times or use job checkpointing for saving
 the execution state to resume from the last saved point 
-
-**Job data model for Jobs cache where we mark node id an ignite SQL queryable
-indexed field :**
-
-**How the ignite failed nodes cache interceptor is implemented :**
-
-**How the ignite jobs cache interceptor is implemented :**
-
-**Apache ignite config :**
-
-Enable Node removal and failure events listening ONLY as enabling too much
-events will cause some performance overhead
-
-**Main App tester :**
 
 **Testing flow :**
 
