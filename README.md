@@ -1,4 +1,4 @@
-### How to guarantee your single computation task is guaranteed to failover in case of node failures in apache Ignite
+### How to guarantee your single computation task to be finished in case of node failures/crash in apache Ignite
 
 How to guarantee your single computation task is guaranteed to failover in case of node failures in apache Ignite ?
 
