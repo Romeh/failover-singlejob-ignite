@@ -6,10 +6,8 @@ import org.apache.ignite.cache.query.annotations.QuerySqlField;
 
 //Sample job model
 @Builder
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
+@Data
+@AllArgsConstructor
 public class Job {
 
     @QuerySqlField(index = true)

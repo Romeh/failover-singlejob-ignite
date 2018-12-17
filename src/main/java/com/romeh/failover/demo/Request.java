@@ -1,12 +1,11 @@
 package com.romeh.failover.demo;
 
 
-import com.google.code.morphia.annotations.Indexed;
+
 import lombok.*;
 import org.apache.ignite.cache.query.annotations.QuerySqlField;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 
 @Builder
